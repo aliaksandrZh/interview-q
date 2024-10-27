@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      const button = document.createElement("button");
+      button.textContent = "Click me";
+      button.style.position = "fixed";
+      button.style.top = "50%";
+      button.style.left = "50%";
+      button.style.zIndex = 99999999;
+      document.body.appendChild(button);
+
+      const microtask1 = () => console.log("Microtask 1");
+      const microtask2 = () => console.log("Microtask 2");
+
+      const clickHandler1 = () => {
+        queueMicrotask(microtask1);
+        console.log("Listener 1");
+      };
+
+      const clickHandler2 = () => {
+        queueMicrotask(microtask2);
+        console.log("Listener 2");
+      };
+
+      button.addEventListener("click", clickHandler1);
+
+      button.addEventListener("click", clickHandler2);
+    </script>
+  </body>
+</html>
