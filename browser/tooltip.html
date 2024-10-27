@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamically Added Tooltip</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .tooltip {
+            width: 250px;
+            background: #333;
+            color: #fff;
+            text-align: left;
+            padding: 15px;
+            border-radius: 8px;
+            position: absolute;
+            bottom: 125%; /* Position above the target */
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tooltip::before {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 8px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tooltip-container" id="tooltipTrigger">
+    Hover or click me
+</div>
+
+<script>
+    const tooltipTrigger = document.getElementById('tooltipTrigger');
+
+    function createTooltip() {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.innerHTML = `
+            <h3>Tooltip Title</h3>
+            <p>This tooltip is dynamically added and removed from the DOM.</p>
+        `;
+        document.body.appendChild(tooltip);
+        return tooltip;
+    }
+
+    function showTooltip(event) {
+        const tooltip = createTooltip();
+        const { top, left, height } = tooltipTrigger.getBoundingClientRect();
+
+        tooltip.style.top = `${top - 10 - tooltip.offsetHeight}px`;
+        tooltip.style.left = `${left + tooltipTrigger.offsetWidth / 2 - tooltip.offsetWidth / 2}px`;
+
+        setTimeout(() => {
+            tooltip.classList.add('visible');
+        }, 0);
+
+        tooltipTrigger.tooltip = tooltip;
+
+        tooltipTrigger.addEventListener('mouseleave', hideTooltip);
+        tooltip.addEventListener('mouseleave', hideTooltip);
+    }
+
+    function hideTooltip() {
+        if (tooltipTrigger.tooltip) {
+            tooltipTrigger.tooltip.classList.remove('visible');
+            setTimeout(() => {
+                if (tooltipTrigger.tooltip) {
+                    document.body.removeChild(tooltipTrigger.tooltip);
+                    delete tooltipTrigger.tooltip;
+                }
+            }, 300);
+        }
+    }
+
+    tooltipTrigger.addEventListener('mouseenter', showTooltip);
+</script>
+
+</body>
+</html>
