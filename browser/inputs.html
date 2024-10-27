@@ -96,6 +96,23 @@
             }
        }
        
+       /*
+       * Code Constraints:
+       * 1. You are only allowed to add code; you cannot modify or delete any existing code.
+       * 2. You are allowed to change HTML
+       * 
+       * Request Cancellation Logic:
+       * 1. When a user starts typing in an input field with a data-filterId, a new request should be triggered after a FilterDelay (500 ms).
+       * 2. If a user continues typing while a request is already in progress:
+       * * 2.1 Do not allow multiple requests to run simultaneously for the same filter
+       * * 2.2 Ensure the request parameters (ID and value) are accurate at the time the request is resolved.
+       * 
+       * Example Scenario:
+       * 1. A user types 12 in a field. A request with value: "12" starts.
+       * 2. While the request is in progress, the user continues typing, resulting in the input value changing to 123.
+       * 3. When the original request (for value: "12") finishes:
+       * * 3.1 Since the current input value is "123", the request result should not be applied to the interface if it’s outdated.
+       * */
         const request = ({id, value}) => {
             if (LoadingState.isLoading) {
                 return ;
