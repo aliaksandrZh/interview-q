@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>$Title$</title>
+</head>
+<body>
+    <section data-filterWrapper>
+        <input data-filterId="1" placeholder="Filter 1"/>
+        <input data-filterId="2" placeholder="Filter 2"/>
+        <input data-filterId="3" placeholder="Filter 3"/>
+        <input data-filterId="4" placeholder="Filter 4"/>
+        <input data-filterId="5" placeholder="Filter 5"/>
+        <input data-filterId="6" placeholder="Filter 6"/>
+    </section>
+    
+    <script>
+        const CONFIG = {
+            FilterDelay: 500,
+            RequestDelay: 5000,
+        };
+        class LoaderComponent extends HTMLElement {
+            constructor() {
+                super();
+
+                const shadow = this.attachShadow({ mode: 'open' });
+
+                const loaderContainer = document.createElement('div');
+                loaderContainer.setAttribute('class', 'loader');
+
+                const style = document.createElement('style');
+                style.textContent = `
+                .loader {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: rgba(255, 255, 255, 0.8);
+                    z-index: 1000;
+                    font-size: 1.5em;
+                    color: #333;
+                }
+    
+                .spinner {
+                    border: 4px solid rgba(0, 0, 0, 0.1);
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    border-left-color: #333;
+                    animation: spin 1s ease infinite;
+                }
+    
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
+                const spinner = document.createElement('div');
+                spinner.setAttribute('class', 'spinner');
+
+                loaderContainer.appendChild(spinner);
+                shadow.appendChild(style);
+                shadow.appendChild(loaderContainer);
+            }
+        }
+
+        customElements.define('loader-component', LoaderComponent);
+
+        class LoadingState {
+           static isLoading = false;
+           static startLoading() {
+               LoadingState.isLoading = true;
+               LoadingState.showLoader();
+           }
+           
+           static finishLoading() {
+               LoadingState.isLoading = false;
+               LoadingState.hideLoader();
+           }
+
+            static showLoader() {
+                if (!document.querySelector('loader-component')) {
+                    const loader = document.createElement('loader-component');
+                    document.body.appendChild(loader);
+                }
+            }
+
+            static hideLoader() {
+                const loader = document.querySelector('loader-component');
+                if (loader) {
+                    loader.remove();
+                }
+            }
+       }
+       
+        const request = ({id, value}) => {
+            if (LoadingState.isLoading) {
+                return ;
+            }
+
+            LoadingState.startLoading();
+            
+            console.log(`${id} is pending: ${value}`);
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    console.log(`${id} is resolved`);
+                    resolve();
+                    LoadingState.finishLoading();
+                }, CONFIG.RequestDelay);
+            });
+        }
+        
+        let setTimeoutIdentifier = undefined;
+
+        const filter = (event) => {
+
+            if (setTimeoutIdentifier) {
+                clearTimeout(setTimeoutIdentifier);
+                setTimeoutIdentifier = undefined;
+            }
+
+            setTimeoutIdentifier = setTimeout(() => {
+                request({
+                    id: event.target.getAttribute('data-filterId'),
+                    value: event.target.value,
+                });
+
+            }, CONFIG.FilterDelay);
+        }
+
+        const inputs = document.querySelectorAll("input[data-filterId]");
+        
+        inputs.forEach(input => input.addEventListener('input', filter));
+    </script>
+</body>
+</html>
